@@ -21,7 +21,7 @@ Personal configuration files for development environments across Linux and macOS
 2. Create symlinks:
    ```bash
    # Neovim
-   ln -s ~/dev/dotfiles/.config/nvim ~/.config/nvim
+   ln -s ~/dev/dotfiles/dot_config/nvim ~/.config/nvim
    ```
 
 3. Install Neovim (v0.11+):
