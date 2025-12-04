@@ -1,0 +1,31 @@
+# LazyVim/Lazy.nvim plugin directory
+.lazy/
+lazy-lock.json
+
+# LSP and language server configs
+.luarc.json
+.luarc.jsonc
+
+# Testing and debug
+tt.*
+.tests
+.repro
+debug
+foo.*
+
+# Logs
+*.log
+
+# Data and cache
+data
+
+# Generated docs
+doc/tags
+
+# Spell files (auto-generated)
+spell/*.spl
+spell/*.sug
+
+# Session files
+Session.vim
+.session
