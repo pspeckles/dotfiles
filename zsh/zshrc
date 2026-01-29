@@ -35,65 +35,11 @@ export EDITOR=/usr/bin/nvim
 typeset -A ZSH_HIGHLIGHT_STYLES
 
 # ============================================
-# Git prompt functions
+# Starship Prompt
 # ============================================
-autoload -Uz vcs_info
-precmd_vcs_info() { vcs_info }
-precmd_functions+=( precmd_vcs_info )
-setopt prompt_subst
-
-# Configure vcs_info for git
-zstyle ':vcs_info:*' enable git
-zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' stagedstr '%F{yellow}✚%f'
-zstyle ':vcs_info:*' unstagedstr '%F{blue}*%f'
-zstyle ':vcs_info:git:*' formats '|%F{green}%b%f%c%u'
-zstyle ':vcs_info:git:*' actionformats '|%F{green}%b%f%c%u %F{red}(%a)%f'
-
-# Function to show untracked files
-git_untracked() {
-    if git rev-parse --is-inside-work-tree &>/dev/null; then
-        if [[ -n $(git ls-files --others --exclude-standard 2>/dev/null) ]]; then
-            echo '%F{yellow}?%f'
-        fi
-    fi
-}
-
-# Function to show clean state
-git_clean() {
-    if git rev-parse --is-inside-work-tree &>/dev/null; then
-        if git diff --quiet HEAD 2>/dev/null && [[ -z $(git ls-files --others --exclude-standard 2>/dev/null) ]]; then
-            echo '%F{green}✓%f'
-        fi
-    fi
-}
-
-# ============================================
-# Powerline Prompt
-# ============================================
-# Powerline provides: status, time, git branch, virtualenv, hostname, etc.
-# Install with: sudo pacman -S powerline powerline-fonts
-# Or: pip install --user powerline-status
-
-# Check for system powerline (pacman install)
-if [[ -r /usr/share/powerline/bindings/zsh/powerline.zsh ]]; then
-    powerline-daemon -q
-    source /usr/share/powerline/bindings/zsh/powerline.zsh
-# Check for pip user install
-elif [[ -d ~/.local/lib ]]; then
-    _pl_path=$(find ~/.local/lib -name "powerline.zsh" -path "*/bindings/zsh/*" 2>/dev/null | head -1)
-    if [[ -n "$_pl_path" ]]; then
-        powerline-daemon -q
-        source "$_pl_path"
-    fi
-fi
-
-# Fallback prompt if powerline is not installed
-if ! type powerline &>/dev/null && ! type powerline-daemon &>/dev/null; then
-    # Original prompt as fallback
-    PROMPT='%n@%m:%F{green}%~%f${vcs_info_msg_0_}$(git_untracked)$(git_clean)
-%(?.%F{white}.%F{red})➤%f '
-fi
+# Install: curl -sS https://starship.rs/install.sh | sh
+# Or: pacman -S starship (Arch) / brew install starship (macOS)
+eval "$(starship init zsh)"
 
 # ============================================
 # asdf version manager

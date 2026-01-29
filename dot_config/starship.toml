@@ -1,0 +1,85 @@
+# Starship prompt configuration
+# Tomorrow Night theme colors
+
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$java\
+$nodejs\
+$python\
+$rust\
+$golang\
+$cmd_duration\
+$line_break\
+$character"""
+
+[character]
+success_symbol = "[➤](white)"
+error_symbol = "[➤](red)"
+vimcmd_symbol = "[◆](green)"
+
+[directory]
+style = "green"
+truncation_length = 5
+truncate_to_repo = false
+
+[git_branch]
+symbol = ""
+style = "green"
+format = "[|$symbol$branch]($style)"
+
+[git_status]
+style = "yellow"
+format = "[$all_status$ahead_behind]($style)"
+staged = "[✚](yellow)"
+modified = "[*](blue)"
+untracked = "[?](yellow)"
+deleted = "[✖](red)"
+conflicted = "[!](red)"
+ahead = "[⇡${count}](green)"
+behind = "[⇣${count}](red)"
+diverged = "[⇕](red)"
+
+[cmd_duration]
+min_time = 2000
+style = "bold yellow"
+format = " [$duration]($style)"
+
+[username]
+style_user = "white"
+style_root = "red bold"
+format = "[$user]($style)"
+show_always = false
+
+[hostname]
+style = "white"
+format = "[@$hostname]($style):"
+ssh_only = true
+
+[java]
+symbol = " "
+style = "red"
+format = " [$symbol$version]($style)"
+
+[nodejs]
+symbol = " "
+style = "green"
+format = " [$symbol$version]($style)"
+
+[python]
+symbol = " "
+style = "yellow"
+format = " [$symbol$version]($style)"
+
+[rust]
+symbol = " "
+style = "red"
+format = " [$symbol$version]($style)"
+
+[golang]
+symbol = " "
+style = "cyan"
+format = " [$symbol$version]($style)"
