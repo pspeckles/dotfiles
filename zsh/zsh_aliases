@@ -1,0 +1,99 @@
+# ============================================
+# File listing
+# ============================================
+alias ls='ls --color=auto'
+alias ll='ls -lah'
+alias la='ls -A'
+alias l='ls -CF'
+alias lt='ls -lahtr'            # sort by time, newest last
+
+# ============================================
+# Navigation
+# ============================================
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias -- -='cd -'               # go back to previous dir
+
+# ============================================
+# Safety nets
+# ============================================
+alias rm='rm -I'
+alias cp='cp -i'
+alias mv='mv -i'
+alias ln='ln -i'
+
+# ============================================
+# Grep
+# ============================================
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+
+# ============================================
+# Disk usage
+# ============================================
+alias df='df -h'
+alias du='du -h'
+alias dud='du -d 1 -h'          # depth 1
+alias duf='du -sh *'            # summary of current dir
+
+# ============================================
+# Git
+# ============================================
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gaa='git add --all'
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gp='git push'
+alias gpl='git pull'
+alias gf='git fetch'
+alias gb='git branch'
+alias gco='git checkout'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gl='git log --oneline -15'
+alias glog='git log --oneline --graph --decorate'
+
+# ============================================
+# Editors
+# ============================================
+alias v='nvim'
+alias vi='nvim'
+alias vim='nvim'
+
+# ============================================
+# System
+# ============================================
+alias reload='source ~/.zshrc'
+alias path='echo $PATH | tr ":" "\n"'
+alias now='date +"%Y-%m-%d %H:%M:%S"'
+
+# ============================================
+# Pacman / Arch
+# ============================================
+alias pac='sudo pacman'
+alias pacs='pacman -Ss'         # search
+alias paci='sudo pacman -S'     # install
+alias pacr='sudo pacman -Rs'    # remove with deps
+alias pacu='sudo pacman -Syu'   # update system
+alias pacq='pacman -Qi'         # package info
+
+# ============================================
+# Global aliases (work anywhere in command)
+# ============================================
+alias -g G='| grep'
+alias -g L='| less'
+alias -g H='| head'
+alias -g T='| tail'
+alias -g NUL='> /dev/null 2>&1'
+
+# ============================================
+# Suffix aliases (auto-open files)
+# ============================================
+alias -s {md,txt,json,yaml,yml}=nvim
+alias -s {jpg,jpeg,png,gif}=xdg-open
+alias -s {pdf}=xdg-open

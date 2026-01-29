@@ -1,0 +1,181 @@
+# History
+HISTFILE=~/.histfile
+HISTSIZE=5000
+SAVEHIST=100000
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt SHARE_HISTORY
+
+# Vi mode
+bindkey -v
+export KEYTIMEOUT=1
+
+# Completion system
+zstyle :compinstall filename '/home/pspeckles/.zshrc'
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+autoload -Uz compinit
+compinit
+
+# ============================================
+# PATH and Environment
+# ============================================
+export PATH="$HOME/.local/bin:$PATH"
+export EDITOR=/usr/bin/nvim
+
+# ============================================
+# Aliases
+# ============================================
+[[ -f ~/.zsh_aliases ]] && source ~/.zsh_aliases
+
+# ============================================
+# Colors (Tomorrow Night theme)
+# ============================================
+# Syntax highlighting colors (configured below after plugin load)
+typeset -A ZSH_HIGHLIGHT_STYLES
+
+# ============================================
+# Git prompt functions
+# ============================================
+autoload -Uz vcs_info
+precmd_vcs_info() { vcs_info }
+precmd_functions+=( precmd_vcs_info )
+setopt prompt_subst
+
+# Configure vcs_info for git
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:*' stagedstr '%F{yellow}✚%f'
+zstyle ':vcs_info:*' unstagedstr '%F{blue}*%f'
+zstyle ':vcs_info:git:*' formats '|%F{green}%b%f%c%u'
+zstyle ':vcs_info:git:*' actionformats '|%F{green}%b%f%c%u %F{red}(%a)%f'
+
+# Function to show untracked files
+git_untracked() {
+    if git rev-parse --is-inside-work-tree &>/dev/null; then
+        if [[ -n $(git ls-files --others --exclude-standard 2>/dev/null) ]]; then
+            echo '%F{yellow}?%f'
+        fi
+    fi
+}
+
+# Function to show clean state
+git_clean() {
+    if git rev-parse --is-inside-work-tree &>/dev/null; then
+        if git diff --quiet HEAD 2>/dev/null && [[ -z $(git ls-files --others --exclude-standard 2>/dev/null) ]]; then
+            echo '%F{green}✓%f'
+        fi
+    fi
+}
+
+# ============================================
+# Powerline Prompt
+# ============================================
+# Powerline provides: status, time, git branch, virtualenv, hostname, etc.
+# Install with: sudo pacman -S powerline powerline-fonts
+# Or: pip install --user powerline-status
+
+# Check for system powerline (pacman install)
+if [[ -r /usr/share/powerline/bindings/zsh/powerline.zsh ]]; then
+    powerline-daemon -q
+    source /usr/share/powerline/bindings/zsh/powerline.zsh
+# Check for pip user install
+elif [[ -d ~/.local/lib ]]; then
+    _pl_path=$(find ~/.local/lib -name "powerline.zsh" -path "*/bindings/zsh/*" 2>/dev/null | head -1)
+    if [[ -n "$_pl_path" ]]; then
+        powerline-daemon -q
+        source "$_pl_path"
+    fi
+fi
+
+# Fallback prompt if powerline is not installed
+if ! type powerline &>/dev/null && ! type powerline-daemon &>/dev/null; then
+    # Original prompt as fallback
+    PROMPT='%n@%m:%F{green}%~%f${vcs_info_msg_0_}$(git_untracked)$(git_clean)
+%(?.%F{white}.%F{red})➤%f '
+fi
+
+# ============================================
+# asdf version manager
+# ============================================
+export ASDF_DATA_DIR="${ASDF_DATA_DIR:-$HOME/.asdf}"
+if [[ -f "$ASDF_DATA_DIR/asdf.sh" ]]; then
+    source "$ASDF_DATA_DIR/asdf.sh"
+    # asdf completions
+    fpath=(${ASDF_DATA_DIR}/completions $fpath)
+fi
+
+# ============================================
+# Auto-update JAVA_HOME (from asdf)
+# ============================================
+update_java_home() {
+    if command -v asdf &>/dev/null; then
+        local java_path=$(asdf which java 2>/dev/null)
+        if [[ -n "$java_path" ]]; then
+            local full_path=$(realpath "$java_path")
+            export JAVA_HOME=$(dirname $(dirname "$full_path"))
+            export JDK_HOME="$JAVA_HOME"
+        fi
+    fi
+}
+# Run on each prompt
+precmd_functions+=( update_java_home )
+
+# ============================================
+# Plugins (install with: sudo pacman -S zsh-autosuggestions zsh-syntax-highlighting)
+# ============================================
+
+# Autosuggestions (fish-like)
+if [[ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+    source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#969896'
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+fi
+
+# Syntax highlighting (fish-like) - MUST be sourced last
+if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+    # Tomorrow Night theme colors
+    ZSH_HIGHLIGHT_STYLES[default]='none'
+    ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#d54e53'
+    ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#c397d8'
+    ZSH_HIGHLIGHT_STYLES[alias]='fg=#c397d8'
+    ZSH_HIGHLIGHT_STYLES[builtin]='fg=#c397d8'
+    ZSH_HIGHLIGHT_STYLES[function]='fg=#c397d8'
+    ZSH_HIGHLIGHT_STYLES[command]='fg=#c397d8'
+    ZSH_HIGHLIGHT_STYLES[precommand]='fg=#c397d8,underline'
+    ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#c397d8'
+    ZSH_HIGHLIGHT_STYLES[path]='underline'
+    ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#b9ca4a'
+    ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#b9ca4a'
+    ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#b9ca4a'
+    ZSH_HIGHLIGHT_STYLES[comment]='fg=#e7c547'
+    ZSH_HIGHLIGHT_STYLES[redirection]='fg=#70c0b1'
+    ZSH_HIGHLIGHT_STYLES[arg0]='fg=#c397d8'
+    ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#7aa6da'
+    ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#7aa6da'
+fi
+
+# ============================================
+# Keybindings
+# ============================================
+# Accept autosuggestion with Ctrl+F or End key
+bindkey '^F' autosuggest-accept
+bindkey '^[[F' autosuggest-accept      # End key
+bindkey '^[[4~' autosuggest-accept     # End key (alternate)
+
+# Partial accept (word by word) with Ctrl+Right
+bindkey '^[[1;5C' forward-word
+
+# History search
+bindkey '^R' history-incremental-search-backward
+bindkey '^P' up-history
+bindkey '^N' down-history
+
+# ============================================
+# Rustup/Cargo completions
+# ============================================
+if [[ -d ~/.zfunc ]]; then
+    fpath=(~/.zfunc $fpath)
+fi
