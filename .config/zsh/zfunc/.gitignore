@@ -1,0 +1,3 @@
+# Tool-generated completions (run `rustup completions zsh <tool>` to generate)
+_cargo
+_rustup

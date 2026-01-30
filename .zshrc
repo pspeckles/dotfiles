@@ -26,7 +26,7 @@ export EDITOR=/usr/bin/nvim
 # ============================================
 # Aliases
 # ============================================
-[[ -f ~/.zsh_aliases ]] && source ~/.zsh_aliases
+[[ -f ~/.config/zsh/aliases ]] && source ~/.config/zsh/aliases
 
 # ============================================
 # Colors (Tomorrow Night theme)
@@ -68,19 +68,64 @@ update_java_home() {
 precmd_functions+=( update_java_home )
 
 # ============================================
-# Plugins (install with: sudo pacman -S zsh-autosuggestions zsh-syntax-highlighting)
+# Local environment files (per-system config and secrets)
 # ============================================
+# Directory for machine-specific env files (not tracked in git)
+# Only sources *.env files owned by current user with safe permissions
+# Use this to override ZSH_PLUGIN_DIR, ZSH_AUTOSUGGESTIONS_PATH, etc.
+ZSH_LOCAL_DIR="${ZSH_LOCAL_DIR:-$HOME/.config/zsh-local}"
+
+if [[ -d "$ZSH_LOCAL_DIR" ]]; then
+    for envfile in "$ZSH_LOCAL_DIR"/*.env(N); do
+        [[ -f "$envfile" ]] || continue
+        # Security checks:
+        # 1. Must be owned by current user
+        # 2. Must not be writable by group or others (mode should be 600 or 400)
+        # Note: stat syntax differs between GNU (Linux) and BSD (macOS)
+        if [[ "$OSTYPE" == darwin* ]]; then
+            _zsh_local_mode=$(stat -f '%A' "$envfile" 2>/dev/null)
+        else
+            _zsh_local_mode=$(stat -c '%a' "$envfile" 2>/dev/null)
+        fi
+        if [[ -O "$envfile" ]] && [[ "$_zsh_local_mode" == "600" || "$_zsh_local_mode" == "400" ]]; then
+            source "$envfile"
+        else
+            echo "zsh: skipping $envfile (must be owned by you with mode 600 or 400)" >&2
+        fi
+    done
+    unset envfile _zsh_local_mode
+fi
+
+# ============================================
+# Plugins
+# ============================================
+# Override ZSH_PLUGIN_DIR or individual paths in ~/.config/zsh-local/*.env
+# Arch Linux (pacman): /usr/share/zsh/plugins
+# macOS Homebrew: /opt/homebrew/share (Apple Silicon) or /usr/local/share (Intel)
+
+# Auto-detect plugin directory if not set
+if [[ -z "$ZSH_PLUGIN_DIR" ]]; then
+    if [[ -d /usr/share/zsh/plugins ]]; then
+        ZSH_PLUGIN_DIR="/usr/share/zsh/plugins"
+    elif [[ -d /opt/homebrew/share ]]; then
+        ZSH_PLUGIN_DIR="/opt/homebrew/share"
+    elif [[ -d /usr/local/share ]]; then
+        ZSH_PLUGIN_DIR="/usr/local/share"
+    fi
+fi
 
 # Autosuggestions (fish-like)
-if [[ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-    source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+ZSH_AUTOSUGGESTIONS_PATH="${ZSH_AUTOSUGGESTIONS_PATH:-$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh}"
+if [[ -f "$ZSH_AUTOSUGGESTIONS_PATH" ]]; then
+    source "$ZSH_AUTOSUGGESTIONS_PATH"
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#969896'
     ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 fi
 
 # Syntax highlighting (fish-like) - MUST be sourced last
-if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+ZSH_SYNTAX_HIGHLIGHTING_PATH="${ZSH_SYNTAX_HIGHLIGHTING_PATH:-$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh}"
+if [[ -f "$ZSH_SYNTAX_HIGHLIGHTING_PATH" ]]; then
+    source "$ZSH_SYNTAX_HIGHLIGHTING_PATH"
 
     # Tomorrow Night theme colors
     ZSH_HIGHLIGHT_STYLES[default]='none'
@@ -120,8 +165,8 @@ bindkey '^P' up-history
 bindkey '^N' down-history
 
 # ============================================
-# Rustup/Cargo completions
+# Custom completions (Rustup/Cargo, etc.)
 # ============================================
-if [[ -d ~/.zfunc ]]; then
-    fpath=(~/.zfunc $fpath)
+if [[ -d ~/.config/zsh/zfunc ]]; then
+    fpath=(~/.config/zsh/zfunc $fpath)
 fi
